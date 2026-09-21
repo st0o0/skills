@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.1.0](https://github.com/st0o0/skills/compare/akka-skills-v1.0.1...akka-skills-v1.1.0) (2026-09-21)
+
+
+### Features
+
+* add advanced patterns, become-state-machines, streams, supervision skills ([4de6a3a](https://github.com/st0o0/skills/commit/4de6a3ad0397801b1070400a10966b8d17d18c70))
+
 ## [1.0.1](https://github.com/st0o0/skills/compare/akka-skills-v1.0.0...akka-skills-v1.0.1) (2026-09-21)
 
 
