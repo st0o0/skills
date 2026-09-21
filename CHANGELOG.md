@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.0.1](https://github.com/st0o0/skills/compare/akka-skills-v1.0.0...akka-skills-v1.0.1) (2026-09-21)
+
+
+### Bug Fixes
+
+* add marketplace.json for plugin discovery ([a0d654c](https://github.com/st0o0/skills/commit/a0d654c89bd7f94f574411c3dcc189eb21fddbb5))
+
 ## [1.0.0](https://github.com/st0o0/skills/compare/akka-skills-v1.0.0...akka-skills-v1.0.0) (2026-09-21)
 
 
