@@ -136,9 +136,10 @@ _log.Debug("At capacity ({MaxConcurrent}), stashing query", _maxConcurrent);
 
 Use `Debug` for flow control decisions that happen frequently.
 
-## Serilog setup (via Servus)
+## Serilog setup
 
-Configure Serilog through a `IServiceSetupContainer`:
+Configure Serilog in a setup container (when using Servus AppBuilder — see `akka-setup-container`)
+or directly in `Program.cs`:
 
 ```csharp
 using Serilog;

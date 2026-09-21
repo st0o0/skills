@@ -202,71 +202,10 @@ Why this order:
 - **Akka before Application** — endpoints resolve actors via `IActorRegistry`
 - **Application last** — global middleware wraps all registered endpoints
 
-## Singleton vs ShardRegion registration
+## Actor registration in AkkaSetupContainer
 
-### Singletons — one instance per cluster
-
-```csharp
-.WithSingleton<IMarker>("actor-name",
-    (_, _, resolver) => resolver.Props<MyManager>())
-```
-
-- Use for: orchestrators, managers, bridges to external services
-- Actor naming convention: `*Manager`, `*Bridge`
-- Marker interface in Core: `public interface IMyManager;`
-
-### Shard regions — per-entity actors
-
-```csharp
-.WithShardRegion<IMarker>("region-name",
-    (_, _, resolver) => _ => resolver.Props<MyWorker>(),
-    new ShardMessageExtractor(),
-    new ShardOptions { PassivateIdleEntityAfter = TimeSpan.FromSeconds(30) })
-```
-
-- Use for: per-entity state (downloads, searches, history entries)
-- Actor naming convention: `*Worker`
-- Marker interface in Core: `public interface IMyRegion;`
-- Requires a `ShardMessageExtractor` (see below)
-
-### ShardMessageExtractor
-
-Route messages to the correct entity by extracting an entity ID:
-
-```csharp
-using Akka.Cluster.Sharding;
-using <Project>.Messages;
-
-namespace <Project>.Core;
-
-public sealed class ShardMessageExtractor(int maxShards = 25) : HashCodeMessageExtractor(maxShards)
-{
-    public override string EntityId(object message) => message switch
-    {
-        IWithDownloadId m => m.DownloadId.ToString(),
-        IWithSearchId m => m.SearchId.ToString(),
-        IWithEntityId m => m.EntityId,
-        _ => throw new ArgumentException(
-            $"Unknown sharded message type: {message.GetType().Name}", nameof(message)),
-    };
-}
-```
-
-Messages routed to shard regions must implement a marker interface
-(e.g. `IWithDownloadId`) declared in the Messages project.
-
-### Shard regions with entity ID in Props
-
-When the worker needs its entity ID at construction:
-
-```csharp
-.WithShardRegion<IMarker>("region-name",
-    (_, _, resolver) => entityId => resolver.Props<MyWorker>(entityId),
-    new ShardMessageExtractor(),
-    new ShardOptions())
-```
-
-The `entityId` parameter flows through to the actor constructor.
+Register singletons and shard regions inside `BuildSystem()`. See `akka-cluster-hosting`
+for the full pattern (WithSingleton, WithShardRegion, ShardMessageExtractor).
 
 ## File layout
 

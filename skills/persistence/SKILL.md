@@ -276,7 +276,7 @@ Not every actor needs event sourcing. Skip persistence for:
 - **Managers with reconstructable state** — e.g. config pushed from another actor on startup
 
 These actors use `ReceiveActor` (not `ReceivePersistentActor`) with the non-persistent
-Pathfinder pattern. See `akka-pathfinder` for that template.
+state pattern. See `akka-actor-state` for that template.
 
 ## Testing persistence state
 
@@ -286,9 +286,9 @@ Test `GetPersistenceState` / `FromPersistence` roundtrips in state-only tests (n
 [Fact]
 public void Roundtrip_persists_and_restores_state()
 {
-    var state = HistoryState.Empty.Apply(someEvent).Apply(anotherEvent);
+    var state = <Name>State.Empty.Apply(someEvent).Apply(anotherEvent);
     var persisted = state.GetPersistenceState();
-    var restored = HistoryState.FromPersistence(persisted);
+    var restored = <Name>State.FromPersistence(persisted);
 
     Assert.Equal(state.Items.Count, restored.Items.Count);
 }
@@ -296,10 +296,10 @@ public void Roundtrip_persists_and_restores_state()
 [Fact]
 public void Empty_state_roundtrips()
 {
-    var persisted = HistoryState.Empty.GetPersistenceState();
-    var restored = HistoryState.FromPersistence(persisted);
+    var persisted = <Name>State.Empty.GetPersistenceState();
+    var restored = <Name>State.FromPersistence(persisted);
 
-    Assert.Equal(HistoryState.Empty, restored);
+    Assert.Equal(<Name>State.Empty, restored);
 }
 ```
 

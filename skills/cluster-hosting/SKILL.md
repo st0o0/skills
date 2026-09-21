@@ -33,21 +33,21 @@ builder.WithSingleton<IMarkerInterface>("actor-name",
     (_, _, resolver) => resolver.Props<MyManager>());
 ```
 
-- Marker interface in Core (e.g. `ISearchManager`, `IDownloadManager`)
+- Marker interface in Core (e.g. `IOrderManager`, `ICatalogManager`)
 - Actor name is the Akka path name — lowercase, hyphenated
 - `resolver.Props<T>()` for actors needing DI services
-- Resolve at runtime: `Context.GetActor<ISearchManager>()`
+- Resolve at runtime: `Context.GetActor<IOrderManager>()`
 
 ### Example — multiple singletons
 
 ```csharp
 builder
-    .WithSingleton<ISearchManager>("search-manager",
-        (_, _, resolver) => resolver.Props<SearchManager>())
-    .WithSingleton<IDownloadManager>("download-manager",
-        (_, _, resolver) => resolver.Props<DownloadManager>())
-    .WithSingleton<IRuleSetManager>("ruleset-manager",
-        (_, _, resolver) => resolver.Props<RuleSetManager>());
+    .WithSingleton<IOrderManager>("order-manager",
+        (_, _, resolver) => resolver.Props<OrderManager>())
+    .WithSingleton<ICatalogManager>("catalog-manager",
+        (_, _, resolver) => resolver.Props<CatalogManager>())
+    .WithSingleton<INotificationManager>("notification-manager",
+        (_, _, resolver) => resolver.Props<NotificationManager>());
 ```
 
 ## Shard Region
@@ -74,16 +74,16 @@ builder.WithShardRegion<IRegionMarker>("shard-name",
 
 ```csharp
 builder
-    .WithShardRegion<ITvSearchRegion>("tv-search",
-        (_, _, resolver) => _ => resolver.Props<TvSearchWorker>(),
+    .WithShardRegion<IOrderRegion>("order-worker",
+        (_, _, resolver) => _ => resolver.Props<OrderWorker>(),
         new ShardMessageExtractor(),
         new ShardOptions { PassivateIdleEntityAfter = TimeSpan.FromSeconds(30) })
-    .WithShardRegion<IDownloadRegion>("download-worker",
-        (_, _, resolver) => _ => resolver.Props<DownloadWorker>(),
+    .WithShardRegion<IPaymentRegion>("payment-worker",
+        (_, _, resolver) => _ => resolver.Props<PaymentWorker>(),
         new ShardMessageExtractor(),
         new ShardOptions())
-    .WithShardRegion<IHistoryRegion>("history",
-        (_, _, resolver) => entityId => resolver.Props<HistoryWorker>(entityId),
+    .WithShardRegion<ILedgerRegion>("ledger",
+        (_, _, resolver) => entityId => resolver.Props<LedgerWorker>(entityId),
         new ShardMessageExtractor(),
         new ShardOptions());
 ```
@@ -113,9 +113,9 @@ public sealed class ShardMessageExtractor(int maxShards = 25)
 {
     public override string EntityId(object message) => message switch
     {
-        IWithDownloadId m => m.DownloadId.ToString(),
-        IWithSearchId m => m.SearchId.ToString(),
-        IWithRuleSetId m => m.RuleSetId,
+        IWithOrderId m => m.OrderId.ToString(),
+        IWithPaymentId m => m.PaymentId.ToString(),
+        IWithLedgerId m => m.LedgerId,
         _ => throw new ArgumentException(
             $"Unknown sharded message type: {message.GetType().Name}", nameof(message)),
     };
@@ -150,16 +150,16 @@ Live in the Messages project. Each sharded entity type gets one interface.
 ```csharp
 namespace <Project>.Messages;
 
-public interface IWithDownloadId { Guid DownloadId { get; } }
-public interface IWithSearchId { Guid SearchId { get; } }
-public interface IWithRuleSetId { string RuleSetId { get; } }
+public interface IWithOrderId { Guid OrderId { get; } }
+public interface IWithPaymentId { Guid PaymentId { get; } }
+public interface IWithLedgerId { string LedgerId { get; } }
 ```
 
 Messages implement them for routing — C# records auto-implement the getter:
 
 ```csharp
-public sealed record InitDownload(Guid DownloadId, string Title, ...) : IWithDownloadId;
-public sealed record CancelDownload(Guid DownloadId) : IWithDownloadId;
+public sealed record PlaceOrder(Guid OrderId, string Item, ...) : IWithOrderId;
+public sealed record CancelOrder(Guid OrderId) : IWithOrderId;
 ```
 
 All messages for the same entity type share the same marker interface.
@@ -170,8 +170,8 @@ Resolve the shard region by its marker interface, then Tell/Ask. The message
 extractor routes to the correct entity automatically.
 
 ```csharp
-var shardRegion = Context.GetActor<IDownloadRegion>();
-shardRegion.Tell(new InitDownload(downloadId, title, url));
+var shardRegion = Context.GetActor<IOrderRegion>();
+shardRegion.Tell(new PlaceOrder(orderId, item, quantity));
 ```
 
 No need to know which node the entity lives on — Akka Cluster Sharding handles
@@ -181,8 +181,8 @@ routing, creation, and passivation transparently.
 
 | Interface type | Location | Example |
 |---------------|----------|---------|
-| Actor markers (for `GetActor<T>`) | `<Project>.Core` | `ISearchManager`, `IDownloadRegion` |
-| Message markers (for extractor) | `<Project>.Messages` | `IWithDownloadId`, `IWithSearchId` |
+| Actor markers (for `GetActor<T>`) | `<Project>.Core` | `IOrderManager`, `IOrderRegion` |
+| Message markers (for extractor) | `<Project>.Messages` | `IWithOrderId`, `IWithPaymentId` |
 
 ## Checklist — adding a new sharded entity
 

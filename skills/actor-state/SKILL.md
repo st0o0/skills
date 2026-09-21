@@ -36,7 +36,7 @@ public interface I<Name>;
 ```
 
 Register via Akka.Hosting: `ActorRegistry.For(system).Register<IMyActor>(actorRef)`
-Resolve at runtime: `Context.GetActor<IMyActor>()`
+Resolve at runtime: `Context.GetActor<IMyActor>()` (requires Servus.Akka or equivalent registry extension)
 NEVER pass `IActorRef` as a constructor param.
 
 For actors needing DI services: `resolver.Props<T>()`.
