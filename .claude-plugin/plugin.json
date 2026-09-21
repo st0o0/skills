@@ -8,6 +8,8 @@
     "./skills/project-structure",
     "./skills/messages",
     "./skills/testing",
-    "./skills/logging"
+    "./skills/logging",
+    "./skills/setup-container",
+    "./skills/cluster-hosting"
   ]
 }
