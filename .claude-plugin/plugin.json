@@ -1,6 +1,6 @@
 {
   "name": "akka-skills",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Opinionated Akka.NET conventions for Claude Code — actor state pattern, persistence separation, message conventions, project structure, testing, and logging.",
   "skills": [
     "./skills/actor-state",
