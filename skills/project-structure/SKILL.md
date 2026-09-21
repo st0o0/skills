@@ -136,6 +136,82 @@ Tests use xUnit v3 on Microsoft.Testing.Platform — `dotnet run`, **not** `dotn
 dotnet run --project src/<Project>.<Domain>.Tests/<Project>.<Domain>.Tests.csproj
 ```
 
+## Architecture tests (ArchUnitNET)
+
+Enforce reference direction and domain isolation with automated architecture tests
+in a dedicated `<Project>.Architecture.Tests` project.
+
+```csharp
+using ArchUnitNET.Domain;
+using ArchUnitNET.Loader;
+using ArchUnitNET.Fluent;
+using static ArchUnitNET.Fluent.ArchRuleDefinition;
+
+namespace <Project>.Architecture.Tests;
+
+public sealed class ArchitectureSpec
+{
+    private static readonly System.Reflection.Assembly[] Assemblies =
+    [
+        typeof(<Project>.Core.SomeType).Assembly,
+        typeof(<Project>.Messages.SomeMessage).Assembly,
+        typeof(<Project>.Persistence.Events.SomeEvent).Assembly,
+        typeof(<Project>.Search.SearchManager).Assembly,
+        typeof(<Project>.Download.DownloadManager).Assembly,
+        // ... all domain assemblies
+    ];
+
+    private static readonly Architecture Arch = new ArchLoader()
+        .LoadAssemblies(Assemblies)
+        .Build();
+
+    // Messages project has no dependencies on other projects
+    [Fact]
+    public void Messages_should_not_depend_on_any_project()
+    {
+        Types().That().ResideInNamespace("<Project>.Messages", useRegularExpressions: false)
+            .Should().NotDependOnAny(
+                Types().That().ResideInNamespace("<Project>.Core"))
+            .Check(Arch);
+    }
+
+    // Persistence has no Akka dependency
+    [Fact]
+    public void Persistence_should_not_depend_on_akka()
+    {
+        Types().That().ResideInNamespace("<Project>.Persistence", useRegularExpressions: false)
+            .Should().NotDependOnAny(
+                Types().That().ResideInNamespace("Akka"))
+            .Check(Arch);
+    }
+
+    // Domains cannot reference each other
+    [Fact]
+    public void Search_should_not_depend_on_download()
+    {
+        Types().That().ResideInNamespace("<Project>.Search", useRegularExpressions: false)
+            .Should().NotDependOnAny(
+                Types().That().ResideInNamespace("<Project>.Download"))
+            .Check(Arch);
+    }
+
+    // All non-abstract types must be sealed
+    [Fact]
+    public void All_types_should_be_sealed()
+    {
+        Classes().That().AreNotAbstract()
+            .Should().BeSealed()
+            .Check(Arch);
+    }
+}
+```
+
+Rules to enforce:
+- Messages and Persistence have no Akka dependency
+- Each domain cannot depend on other domains (one test per pair)
+- Domains cannot depend on adapters (Api, ArrApi)
+- All non-abstract types must be sealed
+
 ## Checklist — adding a new domain
 
 - [ ] Create `<Project>.<NewDomain>/` with `.csproj` referencing only Core

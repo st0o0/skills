@@ -12,6 +12,10 @@
     "./skills/setup-container",
     "./skills/cluster-hosting",
     "./skills/actor-pools",
-    "./skills/persistence-setup"
+    "./skills/persistence-setup",
+    "./skills/become-state-machines",
+    "./skills/advanced-patterns",
+    "./skills/streams",
+    "./skills/supervision"
   ]
 }
