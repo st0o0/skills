@@ -10,6 +10,8 @@
     "./skills/testing",
     "./skills/logging",
     "./skills/setup-container",
-    "./skills/cluster-hosting"
+    "./skills/cluster-hosting",
+    "./skills/actor-pools",
+    "./skills/persistence-setup"
   ]
 }
