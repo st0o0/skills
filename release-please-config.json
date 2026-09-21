@@ -1,0 +1,18 @@
+{
+  "packages": {
+    ".": {
+      "release-type": "simple",
+      "package-name": "akka-skills",
+      "bump-minor-pre-major": true,
+      "changelog-sections": [
+        { "type": "feat", "section": "Features" },
+        { "type": "fix", "section": "Bug Fixes" },
+        { "type": "docs", "section": "Documentation" }
+      ],
+      "extra-files": [
+        ".claude-plugin/plugin.json"
+      ]
+    }
+  },
+  "$schema": "https://raw.githubusercontent.com/googleapis/release-please/main/schemas/config.json"
+}
