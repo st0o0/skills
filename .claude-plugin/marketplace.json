@@ -1,0 +1,17 @@
+{
+  "name": "akka-skills",
+  "description": "Opinionated Akka.NET conventions for Claude Code — actor state, persistence, messaging, testing, and infrastructure patterns",
+  "owner": {
+    "name": "st0o0",
+    "url": "https://github.com/st0o0"
+  },
+  "repository": "https://github.com/st0o0/skills",
+  "plugins": [
+    {
+      "name": "akka-skills",
+      "source": "./",
+      "version": "1.0.0",
+      "description": "10 Akka.NET skills covering actor state pattern, persistence, project structure, messages, testing, logging, pools, and cluster hosting"
+    }
+  ]
+}
